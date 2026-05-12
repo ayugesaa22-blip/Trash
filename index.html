@@ -4,31 +4,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edu-Trash AR</title>
   <style>
-    body{font-family:Arial,sans-serif;margin:0;background:#0f172a;color:white;text-align:center}
-    header{padding:30px;background:#1e293b}
-    .card{background:#334155;margin:20px auto;padding:20px;border-radius:16px;max-width:400px}
-    button{padding:12px 24px;border:none;border-radius:10px;background:#22c55e;color:white;font-size:16px;cursor:pointer}
-    video{width:90%;max-width:500px;border-radius:12px;margin-top:20px}
+    body { margin:0; font-family:Arial,sans-serif; background:#111; color:#fff; text-align:center; }
+    video { width:100%; height:80vh; object-fit:cover; }
+    .controls { padding:15px; }
+    button {
+      padding:12px 20px; border:none; border-radius:10px;
+      background:#28a745; color:white; font-size:16px; cursor:pointer;
+      margin:5px;
+    }
+    #info {
+      padding:10px; background:#222; margin:10px; border-radius:10px;
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Edu-Trash AR</h1>
-    <p>Belajar memilah sampah dengan Augmented Reality</p>
-  </header>
-  <div class="card">
-    <h2>Scan Objek Sampah</h2>
-    <p>Arahkan kamera ke marker untuk melihat objek 3D dan edukasi interaktif.</p>
-    <button onclick="startAR()">Mulai Scan</button>
-    <video id="camera" autoplay></video>
+  <h2>📷 Edu-Trash AR</h2>
+  <video id="camera" autoplay playsinline></video>
+  <div class="controls">
+    <button onclick="switchCamera()">Balik ke Kamera Belakang/Depan</button>
+    <button onclick="scanTrash()">Scan Sampah</button>
   </div>
-  <script>
-    async function startAR(){
-      const video=document.getElementById('camera');
-      const stream=await navigator.mediaDevices.getUserMedia({video:true});
-      video.srcObject=stream;
-      alert('Kamera aktif! Integrasikan dengan AR.js untuk fitur AR penuh.');
-    }
-  </script>
-</body>
+  <div id="info">Arahkan kamera ke objek sampah untuk belajar.</div><script>
+let currentFacingMode = "user";
+let stream;
+const video = document.getElementById('camera');
+
+async function startCamera() {
+  if (stream) {
+    stream.getTracks().forEach(track => track.stop());
+  }
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: currentFacingMode }
+    });
+    video.srcObject = stream;
+  } catch (err) {
+    alert('Kamera tidak bisa diakses: ' + err.message);
+  }
+}
+
+function switchCamera() {
+  currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+  startCamera();
+}
+
+function scanTrash() {
+  document.getElementById('info').innerHTML = `♻️ Terdeteksi: Botol Plastik<br>
+  Jenis: Anorganik<br>
+  Bisa didaur ulang menjadi pot tanaman.`;
+}
+
+startCamera();
+</script></body>
 </html>
