@@ -4,201 +4,103 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Edu-Trash AR</title>
-
 <style>
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0f172a;
-    color: white;
-    overflow: hidden;
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#e8f5e9;
+    text-align:center;
 }
-
-#camera-container {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
+header{
+    background:#2e7d32;
+    color:white;
+    padding:15px;
 }
-
-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+video{
+    width:90%;
+    max-width:500px;
+    border-radius:15px;
+    margin-top:20px;
+    border:4px solid #388e3c;
 }
-
-.overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border: 4px solid rgba(0,255,100,0.7);
-    box-sizing: border-box;
-    pointer-events: none;
+button{
+    padding:12px 20px;
+    margin:10px;
+    border:none;
+    border-radius:10px;
+    background:#43a047;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
 }
-
-.controls {
-    position: absolute;
-    bottom: 20px;
-    width: 100%;
-    text-align: center;
+button:hover{
+    background:#2e7d32;
 }
-
-button {
-    padding: 14px 22px;
-    margin: 8px;
-    border: none;
-    border-radius: 12px;
-    background: #22c55e;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+#result{
+    background:white;
+    margin:20px auto;
+    padding:20px;
+    width:90%;
+    max-width:600px;
+    border-radius:15px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.2);
+    text-align:left;
 }
-
-button:hover {
-    background: #16a34a;
-}
-
-#info-panel {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    right: 10px;
-    background: rgba(15,23,42,0.9);
-    padding: 16px;
-    border-radius: 14px;
-    max-height: 45%;
-    overflow-y: auto;
-}
-
-h2 {
-    margin-top: 0;
-    color: #4ade80;
+h2{
+    color:#2e7d32;
 }
 </style>
 </head>
 <body>
 
-<div id="camera-container">
-    <video id="video" autoplay playsinline></video>
-    <div class="overlay"></div>
+<header>
+    <h1>♻ Edu-Trash AR</h1>
+    <p>Belajar mengenali sampah dengan scan kamera</p>
+</header>
 
-    <div id="info-panel">
-        <h2>Edu-Trash AR</h2>
-        <p>Arahkan kamera ke objek sampah lalu tekan scan.</p>
-    </div>
+<video id="camera" autoplay playsinline></video>
+<br>
+<button onclick="toggleCamera()">Balik Kamera</button>
+<button onclick="scanTrash()">Scan Sampah</button>
 
-    <div class="controls">
-        <button onclick="switchCamera()">🔄 Balik Kamera</button>
-        <button onclick="scanTrash()">📷 Scan Sampah</button>
-    </div>
+<div id="result">
+    <h2>Hasil Scan</h2>
+    <p>Belum ada scan.</p>
 </div>
 
 <script>
 let currentFacingMode = "environment";
 let stream;
 
-const video = document.getElementById("video");
-
-async function startCamera() {
-    if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-    }
-
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: currentFacingMode
-            }
-        });
-
-        video.srcObject = stream;
-    } catch (err) {
-        alert("Kamera tidak bisa diakses: " + err);
-    }
-}
-
-function switchCamera() {
-    currentFacingMode =
-        currentFacingMode === "environment" ? "user" : "environment";
-    startCamera();
-}
-
-function scanTrash() {
-    const trashData = [
-        {
-            name: "Botol Plastik",
-            type: "Anorganik",
-            desc: `
-            <h2>Botol Plastik</h2>
-            <p><b>Jenis:</b> Sampah Anorganik</p>
-            <p><b>Karakteristik:</b> Tidak mudah terurai secara alami.</p>
-            <p><b>Waktu terurai:</b> 450 - 1000 tahun.</p>
-            <p><b>Dampak:</b></p>
-            <ul>
-                <li>Mencemari tanah dan laut</li>
-                <li>Membahayakan hewan laut</li>
-                <li>Menghasilkan mikroplastik</li>
-            </ul>
-            <p><b>Cara Pengolahan:</b></p>
-            <ul>
-                <li>Reduce: kurangi penggunaan plastik sekali pakai</li>
-                <li>Reuse: gunakan ulang</li>
-                <li>Recycle: daur ulang jadi pot bunga / ecobrick</li>
-            </ul>
-            `
-        },
-        {
-            name: "Kulit Pisang",
-            type: "Organik",
-            desc: `
-            <h2>Kulit Pisang</h2>
-            <p><b>Jenis:</b> Sampah Organik</p>
-            <p><b>Karakteristik:</b> Mudah terurai alami.</p>
-            <p><b>Waktu terurai:</b> 2 - 5 minggu.</p>
-            <p><b>Manfaat:</b></p>
-            <ul>
-                <li>Bisa jadi kompos</li>
-                <li>Pupuk tanaman</li>
-                <li>Pakan ternak tertentu</li>
-            </ul>
-            <p><b>Pengolahan:</b></p>
-            <ul>
-                <li>Masukkan ke komposter</li>
-                <li>Campur tanah</li>
-                <li>Fermentasi menjadi pupuk cair</li>
-            </ul>
-            `
-        },
-        {
-            name: "Kaleng Minuman",
-            type: "Anorganik",
-            desc: `
-            <h2>Kaleng Minuman</h2>
-            <p><b>Jenis:</b> Sampah Anorganik</p>
-            <p><b>Bahan:</b> Aluminium</p>
-            <p><b>Waktu terurai:</b> 80 - 200 tahun</p>
-            <p><b>Kelebihan:</b></p>
-            <ul>
-                <li>Bisa didaur ulang berkali-kali</li>
-                <li>Bernilai ekonomis</li>
-            </ul>
-            <p><b>Daur Ulang:</b></p>
-            <ul>
-                <li>Dilebur kembali</li>
-                <li>Dijadikan kerajinan</li>
-                <li>Bank sampah</li>
-            </ul>
-            `
-        }
-    ];
-
-    const randomTrash = trashData[Math.floor(Math.random() * trashData.length)];
-    document.getElementById("info-panel").innerHTML = randomTrash.desc;
-}
-
-startCamera();
-</script>
-
-</body>
-</html>
+const trashData = [
+{
+name:"Botol Plastik",
+process:"Pisahkan, cuci bersih, setorkan ke bank sampah atau cacah untuk daur ulang.",
+impact:"Mencemari laut, sulit terurai hingga ratusan tahun.",
+recycle:"Pot tanaman, serat pakaian, paving block plastik."
+},
+{
+name:"Kaleng Aluminium",
+process:"Dikumpulkan, dilebur, dibentuk ulang.",
+impact:"Jika dibuang sembarangan dapat mencemari tanah.",
+recycle:"Kaleng baru, rangka sepeda, peralatan dapur."
+},
+{
+name:"Kertas",
+process:"Pisahkan dari sampah basah, daur ulang menjadi bubur kertas.",
+impact:"Menambah volume sampah dan penebangan pohon.",
+recycle:"Buku daur ulang, kardus, kerajinan tangan."
+},
+{
+name:"Kaca",
+process:"Dipilah berdasarkan warna lalu dilebur.",
+impact:"Berbahaya jika pecah, sulit terurai.",
+recycle:"Botol baru, vas bunga, ubin dekoratif."
+},
+{
+name:"Sisa Makanan",
+process:"Diolah jadi kompos.",
+impact:"Menghasilkan gas metana jika menumpuk di TPA.",
+recycle:"Pupuk kompos untuk tanaman."
+},
+{
